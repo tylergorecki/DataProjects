@@ -1,0 +1,254 @@
+---
+title: "PGA Project"
+author: "Tyler Gorecki"
+date: "7/5/2022"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE, highlight=FALSE)
+```
+
+```{r, echo=FALSE, include=FALSE}
+## Use this chunk for reading in packages.
+## Use this chunk for reading in the data, combining the data, and any other major data cleaning that is not relevant to show.
+## Remove the ## before all code.
+
+library(dplyr)
+library(ggplot2)
+library(BSDA)
+
+pga_data <- read.csv("/Users/tylergorecki/Desktop/STAT 3080/Project/pgastats20-21.csv")
+clubheadspeed <- read.csv("/Users/tylergorecki/Desktop/STAT 3080/Project/clubheadspeed21.csv")
+ballspeed <- read.csv("/Users/tylergorecki/Desktop/STAT 3080/Project/ballspeed21.csv")
+strokesgained <- read.csv("/Users/tylergorecki/Desktop/STAT 3080/Project/StrokesGained.csv")
+
+clubheadspeed <- clubheadspeed %>% 
+  rename(NAME = PLAYER.NAME)
+
+ballspeed <- ballspeed %>% 
+  rename(NAME = PLAYER.NAME)
+
+strokesgained <- strokesgained %>% 
+  rename(NAME = PLAYER.NAME)
+
+big_pga <- merge(pga_data, 
+                 merge(clubheadspeed, 
+                       merge(ballspeed, strokesgained, 
+                             by = "NAME"), 
+                       by = "NAME"), 
+                 by = "NAME")
+
+big_pga <- big_pga %>% 
+  rename(AVG.CHS = AVG..x, FASTEST.CLUBHEAD.SPEED = FASTEST.SPEED.x, 
+         AVG.BS = AVG..y, FASTEST.BALL.SPEED = FASTEST.SPEED.y, 
+         SLOWEST.CLUBHEAD.SPEED = SLOWEST.SPEED.x, SLOWEST.BALL.SPEED = SLOWEST.SPEED.y)
+
+big_pga <- big_pga %>% 
+  mutate(AVERAGE.SG.T = TOTAL.SG.T/RNDS, AVERAGE.SG.T2G = TOTAL.SG.T2G/RNDS, 
+         AVERAGE.SG.P = TOTAL.SG.P/RNDS)
+
+big_pga <- merge(big_pga, strokesgained, by = "NAME")
+
+big_pga <- big_pga %>%
+  mutate(AnyWin = if_else(WINS == 0, "NoWins", "Win(s)"))
+```
+
+# Were the top 20 golfers from the 2020-21 PGA Tour season better than the average PGA Tour pro at putting? 
+
+## Background and Data Description
+
+Golf is an incredibly difficult sport both mentally and physically. With the 
+new analytics boom in all sports, golf has followed suit with consistently new 
+technology in golf balls, clubs, and swing analysis. I want to research, as 
+so much new emphasis is being placed on hitting the golf ball further on every 
+shot, if putting still has an impact in forming the difference between the top golfers 
+consistently competing for tournament titles and the rest of the golfers just 
+trying to stay on the PGA Tour. I collected the PGA Tour data by copying the 
+statistics from both the ESPN (1) 
+and PGA Tour (2) websites into an excel spreadsheet. They were converted into 
+csv's and then merged by the name of each golfer in the dataset. The ESPN data 
+included basic statistics for the golfers - statistics like final ranking, number 
+of rounds played, number of wins, average driving distance, and many more. The 
+PGA Tour data contained more advanced and modern analytics like club head speed, 
+ball speed, and strokes gained. Strokes gained is a modern way of comparing 
+golfers directly with each other (3). For every round in each tournament, the 
+net number of strokes gained by all players that day will be zero. If a golfer 
+played better than the rest of the field, their strokes gained will be positive 
+and if they didn't play well, it will be negative. I will be focusing on its putting-specific 
+component to analyze if the top 20 PGA Tour golfers have an above average strokes 
+gained. 
+
+## Research Question #1
+### Which is more impactful towards success among PGA Tour Golfers: Driving or Putting?
+This is one of the most talked about aspects of golf today. With many golfers 
+trying to increase their driving distance, I want to research if there is 
+statistical evidence to support this transition. There are still golfers who 
+don't hit the ball far at all and still compete with the big drivers, so I want 
+to analyze any statistical trends in either direction (1). I will be able to measure 
+success by analyzing how often players finish in the top five, 10, and 20 in 
+tournaments and use each grouping as a basis of success. Earnings can also be 
+used to analyze this as tournament prizing is based on resulting position and 
+also the size / importance of the tournament itself. 
+
+## Research Question #2
+### Do more older PGA Tour golfers have more success in majors?
+It always seems that most of the major tournament winners or those competing for 
+the win in the biggest tournaments are typically household golf names. I want to 
+research if this is due to the media's extra coverage of more well-known golfers 
+or if the more experienced golfers actually do play better in high leverage 
+tournaments. Because there is such a small amount of PGA golfers who make it on 
+tour later in their career at an older age, I feel safe analyzing this data with 
+the understanding that the older golfers are more experienced. 
+
+## Research Question #3
+### Does fairway accuracy and greens in regulation affect the total strokes gained?
+A more recent, advanced golf analytic is called strokes gained. This simply measures 
+the golfer's performance compared to the rest of the field in a specific event (2). 
+I want to research if a higher fairway accuracy and higher greens in regulation 
+rate for a golfer leads to more strokes gained against the field and thus more 
+tournament success. Strokes gained is the most trusted analytic in golf today in 
+judging how well a golfer performed, so it will be interesting to know the magnitude 
+of the importance of hitting the fairway and green with consistency, even among 
+the best golfers in the world. 
+
+### Potential Issues
+
+When comparing the data between both sites, I realized that there was a slight 
+difference in the number of rounds for each golfer in their 2020-21 seasons. The 
+number of rounds was slightly higher from the PGA Tour website (2) and I believe this 
+is due to the fact that they included their postseason tournament in their final 
+statistics, while ESPN (1) did not. The numbers aren't significantly different, but 
+because of this, I will not be comparing any 'total' statistics. Regardless, there 
+is enough data for each golfer that the 'average' statistics can be trusted and 
+appropriately analyzed without having to worry about too small of a sample size 
+helping or hurting any golfer. 
+
+## Data Summaries
+
+### Numerical Summary
+
+```{r}
+big_pga %>%
+  ggplot(aes(x = SCORE, fill = AnyWin)) +
+  geom_bar(stat = 'count', position = 'dodge') +
+  geom_text(stat = 'count', aes(label = ..count..), 
+            position = position_dodge(.1), vjust = -0.5, size = 2) +
+  labs(title = "Typical scores for golfers with vs golfers without wins", 
+       x = "Average score per round", 
+       y = "Number of golfers") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+This is a perfect graph for showing what the typical scores are of golfers that 
+won a tournament this season and the typical scores of the golfers who didn't. It 
+is from this numerical summary that the golfers who had at least one win on the 
+PGA Tour during the 2020-21 season tended to average a lower score over every 
+round they played during the season. It is also clear that only a small amount of 
+golfers on tour actually win a tournament. This shows that winning on tour isn't a 
+fluke and the most consistent golfers win the most tournaments. This is a good 
+baseline when first looking at the data to understand that there is a consistent 
+trend that can be seen with PGA Tour winners. 
+
+### Graphical Summaries
+
+```{r}
+big_pga %>%
+  ggplot(aes(x = DACC, y = AVERAGE)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  labs(title = "Strokes gained vs. driving accuracy", 
+       x = "Percentage of fairways hit off the tee", 
+       y = "Average number of strokes gained per round") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+big_pga %>%
+  ggplot(aes(x = GIR, y = AVERAGE)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  labs(title = "Strokes gained vs. greens in regulation", 
+       x = "Percentage of greens hit in regulation", 
+       y = "Average number of strokes gained per round") +
+  theme(plot.title = element_text(hjust = 0.5))
+
+big_pga %>%
+  ggplot(aes(x = PUTTS, y = AVERAGE)) +
+  geom_point() +
+  geom_smooth(method = 'lm') +
+  labs(title = "Strokes gained vs. putting", 
+       x = "Average number of putts per hole", 
+       y = "Average number of strokes gained per round") +
+  theme(plot.title = element_text(hjust = 0.5))
+```
+
+These three plots were important to include in this report because they help me 
+begin to have an understanding about the answer to my research question. My 
+question was asking whether driving, approach shots, or putting was the most 
+important factor of success among PGA Tour golfers, so I plotted each against 
+average strokes gained per round by golfers. Average strokes gained is the best 
+measure of success because it not only analyzes how well a golfer plays, but it 
+compares it to the rest of the golfers in a particular tournament. The graphical 
+summaries above give an indication that greens in regulation percentage (approach 
+shots) and average number of putts per hole have a stronger correlation with strokes 
+gained per round than driving accuracy. This indicates that approach shots and 
+putting may be more important than driving in terms of success on the PGA Tour. 
+I now have an idea of what to research further when I analyze the data more in 
+the future. 
+
+## Statistical Test
+### One-Sample t-test
+I will be testing the if mean of the average strokes gained putting of the top 
+20 golfers is equal to or greater than the mean of the average strokes gained 
+of all golfers in the 2020-21 PGA Tour season. As stated earlier, the net strokes 
+gained is always zero, so that will be the value of the mean for my null hypothesis. 
+Because my dataset does not contain every single golfer that participated in the 
+season of interest, I do not know the population standard deviation and thus will 
+perform a one sample t-test. For the assumptions of this test, the data is continuous, there 
+are no significant outliers in the sample, and the data is approximately normally distributed 
+(shown in qqplot below). The strokes gained statistic is somewhat dependent one other golfers
+(must sum to zero), but I feel comfortable continuing with this 
+test and trusting the results because the physical putting of each golfer is independent 
+and that's what causes the differences within this statistic. 
+
+```{r}
+qqnorm(big_pga$AVERAGE.SG.P, pch = 1, frame = FALSE)
+qqline(big_pga$AVERAGE.SG.P, col = "steelblue", lwd = 2)
+```
+
+### Hypotheses
+H0: mu = 0 vs. HA: mu > 0
+
+### Test code
+
+```{r}
+topPutting <- big_pga %>% filter(RK <= 20) %>% select(AVERAGE.SG.P)
+t.test(topPutting, alternative = 'greater', mu = 0, conf.level = 0.95)
+```
+
+### Result and Conclusion
+Test stat: t = 3.8056; p-value: p = 0.0005972
+
+Because the p-value is less than 0.05, there is enough evidence to reject the 
+null hypothesis and suggest that the true 
+mean strokes gained of top 20 golfers on the PGA Tour in the 2020-21 season is 
+greater than zero. This means that the top golfers are better putters on average 
+than all PGA Tour golfers as a whole. The results from the test 
+even suggests that the true mean for the top 20 golfers is actually 0.237. This 
+means that the top golfers gain about .237 strokes per round on the rest of the 
+field from putting alone (almost a stroke per tournament, which are usually four 
+rounds). Putting is clearly important for success on the PGA Tour. 
+
+## Further application of the data
+This test can be used to explain the putting of top golfers during the 2020-21 PGA Tour 
+season, but I believe it can be generalized past just the population of golfers from 
+this season. Because they play most tournaments on the same courses every year and most 
+top golfers have little year-to-year variation, I feel comfortable claiming that the 
+top golfers on the PGA Tour are always above average putters for any season from 
+the past and in the future. 
+
+\newpage
+
+## References
+1. <https://www.espn.com/golf/stats/player/_/season/2021>
+2. <https://www.pgatour.com/stats.html>
+3. <https://www.pgatour.com/news/2016/05/31/strokes-gained-defined.html>
