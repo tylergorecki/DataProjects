@@ -8,6 +8,9 @@ This was a project for my advanced sports analytics course in which we were task
 ### NBA Late Shooting Project: 
 This was a project in which I attempted to analyze if there is a true difference when shooting late (less than 2 minutes left in 4Q or OT) in NBA games or if the perceived difference is only due to the smaller sample size. I coded this in python and found that shooting percentages were typically lower across the entire league. This used play-by-play data from the 2019-20 NBA season. 
 
+### NBA Salaries Project: 
+My group used multiple linear regression to attempt to predict NBA salaries using actual statistics from the previous season. This was one of my first times working with a large analytics dataset and helped me gain experience with cleaning data. I  do not have access to the code (done in SAS) to share because one of my group members has the file. We created a somewhat strong model that with more time and tweaking we could've made stronger. 
+
 ### PGA Project: 
 In this project, I analyzed the statistic in golf that is most indicative of a golfers success on tour. I used both ESPN statistics and PGA Tour advanced analytics from 2020-21 to perform this analysis in R. I used heavy plotting to gain this insight and have a better understanding of the questions presented. I found that among PGA Tour golfers, approach shots are most significant. 
 
