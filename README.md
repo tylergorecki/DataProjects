@@ -7,3 +7,5 @@ This was a project in which I attempted to analyze if there is a true difference
 
 ### PGA_Project: 
 In this project, I analyzed the statistic in golf that is most indicative of a golfers success on tour. I used both ESPN statistics and PGA Tour advanced analytics from 2020-21 to perform this analysis in R. I used heavy plotting to gain this insight and have a better understanding of the questions presented. I found that among PGA Tour golfers, approach shots are most significant. 
+
+### Others to add:
