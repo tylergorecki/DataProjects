@@ -1,6 +1,6 @@
-# Statistics Projects
+# Tyler Gorecki Data Projects
 
-In this repository, I have multiple statistics projects I have worked on inside/outside of the classroom. These include projects coding in both R and Python across multiple sports. 
+In this repository, I have multiple data projects I have worked on inside/outside of the classroom. These include projects coding in both R and Python across multiple sports. 
 
 ### Expected Points Project (Fall 22):
 This was a project for my advanced sports analytics course in which we were tasked with creating an expected points model using data from the 2019 NCAA Football season. Using the created model, we wanted to analyze when field goals become not worth the risk (or differently put, when the expected points of punting is greater than the expected points of attempting the field goal). This was a fun project that we worked on for most of the semester using many new techniques in R. 
